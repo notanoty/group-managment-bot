@@ -2,14 +2,20 @@ package org.notanoty;
 
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberUpdated;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+
+import java.util.List;
 
 public class GroupManager implements LongPollingSingleThreadUpdateConsumer
 {
@@ -28,7 +34,7 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
         {
             // Set variables
             String message_text = update.getMessage().getText();
-            long chat_id = update.getMessage().getChatId();
+            long chatId = update.getMessage().getChatId();
             switch (message_text)
             {
                 case "/start" ->
@@ -36,7 +42,7 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
                     // User send /start
                     SendMessage message = SendMessage // Create a message object object
                             .builder()
-                            .chatId(chat_id)
+                            .chatId(chatId)
                             .text(message_text)
                             .build();
                     try
@@ -47,12 +53,20 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
                         e.printStackTrace();
                     }
                 }
+                case "/test" ->
+                {
+                    Message message = update.getMessage();
+
+                    System.out.println(message.getFrom().getUserName());
+                    System.out.println(message.getChat());
+
+                }
                 case "/pic" ->
                 {
                     // User sent /pic
                     SendPhoto msg = SendPhoto
                             .builder()
-                            .chatId(chat_id)
+                            .chatId(chatId)
                             .photo(new InputFile("https://png.pngtree.com/background/20230519/original/pngtree-this-is-a-picture-of-a-tiger-cub-that-looks-straight-picture-image_2660243.jpg"))
                             .caption("This is a little cat :)")
                             .build();
@@ -68,7 +82,7 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
                 {
                     SendMessage message = SendMessage // Create a message object object
                             .builder()
-                            .chatId(chat_id)
+                            .chatId(chatId)
                             .text("Here is your keyboard")
                             .build();
 
@@ -93,7 +107,7 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
                     // Unknown command
                     SendMessage message = SendMessage // Create a message object object
                             .builder()
-                            .chatId(chat_id)
+                            .chatId(chatId)
                             .text("Unknown command")
                             .build();
                     try
