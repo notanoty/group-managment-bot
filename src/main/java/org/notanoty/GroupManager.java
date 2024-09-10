@@ -15,6 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import java.sql.*;
 import java.util.List;
 
 public class GroupManager implements LongPollingSingleThreadUpdateConsumer
@@ -26,6 +27,12 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
         this.telegramClient = new OkHttpTelegramClient(token);
     }
 
+    public TelegramClient getTelegramClient()
+    {
+        return telegramClient;
+    }
+
+
     @Override
     public void consume(Update update)
     {
@@ -35,7 +42,59 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
             // Set variables
             String message_text = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
-            switch (message_text)
+            List<String> words = List.of(message_text.split(" "));
+            String query = "SELECT COUNT(*) FROM users WHERE users.user_id = ?";
+            String queryInsert = "INSERT INTO users (user_id, username, first_name, last_name) VALUES (?, ?, ?, ?)";
+            PreparedStatement preparedStatement = null;
+
+            try (Connection connection = DB.connect())
+            {
+                preparedStatement = connection.prepareStatement(query);
+                preparedStatement.setInt(1, Math.toIntExact(update.getMessage().getFrom().getId()));
+                // Execute the query
+                ResultSet resultSet = preparedStatement.executeQuery();
+
+                // Check the result
+                if (resultSet.next())
+                {
+                    int count = resultSet.getInt(1); // Get the count from the result
+                    if (count == 0)
+                    {
+                        System.out.println("User with ID " + Math.toIntExact(update.getMessage().getFrom().getId()) + " is not present in the table.");
+                        try (PreparedStatement preparedStatementInsert = connection.prepareStatement(queryInsert)) {
+                            // Retrieve user information
+                            int userId = Math.toIntExact(update.getMessage().getFrom().getId());
+                            String username = update.getMessage().getFrom().getUserName();
+                            String firstName = update.getMessage().getFrom().getFirstName();
+                            String lastName = update.getMessage().getFrom().getLastName();
+
+                            // Set values for the insert statement
+                            preparedStatementInsert.setInt(1, userId);
+                            preparedStatementInsert.setString(2, username);
+                            preparedStatementInsert.setString(3, firstName);
+                            preparedStatementInsert.setString(4, lastName);
+
+                            // Execute the insert
+                            int rowsAffected = preparedStatementInsert.executeUpdate();
+                            if (rowsAffected > 0) {
+                                System.out.println("User with ID " + userId + " successfully added to the table.");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        System.out.println("User with ID " + Math.toIntExact(update.getMessage().getFrom().getId()) + " exists in the table.");
+                    }
+                }
+
+            } catch (SQLException e)
+            {
+                throw new RuntimeException(e);
+            }
+
+
+            System.out.println(words);
+            switch (words.getFirst())
             {
                 case "/start" ->
                 {
@@ -55,10 +114,11 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
                 }
                 case "/test" ->
                 {
-                    Message message = update.getMessage();
 
-                    System.out.println(message.getFrom().getUserName());
+                    Message message = update.getMessage();
+                    System.out.println(message.getFrom());
                     System.out.println(message.getChat());
+
 
                 }
                 case "/pic" ->
@@ -120,5 +180,6 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
                 }
             }
         }
+
     }
 }
