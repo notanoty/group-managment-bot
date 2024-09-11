@@ -1,5 +1,5 @@
 package org.notanoty;
 
-public class GroupInfo
+public class Chat
 {
 }

@@ -5,7 +5,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
-import java.net.ConnectException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -26,7 +25,7 @@ public class BotUser
         telegramClient.execute(SendUserInfo);
     }
 
-    public static void addUser(TelegramClient telegramClient, Update update, Connection connection) throws  SQLException
+    public static void addUserGlobal(TelegramClient telegramClient, Update update, Connection connection) throws  SQLException
     {
         String queryInsert = "INSERT INTO users (user_id, username, first_name, last_name) VALUES (?, ?, ?, ?)";
         PreparedStatement preparedStatementInsert = connection.prepareStatement(queryInsert);

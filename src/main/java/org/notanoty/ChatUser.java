@@ -1,5 +1,5 @@
 package org.notanoty;
 
-public class Group
+public class ChatUser
 {
 }

@@ -3,8 +3,6 @@ package org.notanoty;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -13,7 +11,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.List;
 
 public class GroupManager implements LongPollingSingleThreadUpdateConsumer
@@ -108,7 +105,7 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
                     int count = resultSet.getInt(1); // Get the count from the result
                     if (count == 0)
                     {
-                        BotUser.addUser(telegramClient, update, connection);
+                        BotUser.addUserGlobal(telegramClient, update, connection);
                         System.out.println("User with ID " + Math.toIntExact(update.getMessage().getFrom().getId()) + " is not present in the table.");
 
                     }
@@ -143,6 +140,7 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
                         Message message = update.getMessage();
                         System.out.println(message.getFrom());
                         System.out.println(message.getChat());
+                        System.out.println(message);
                     }
                     case "/strike" ->
                     {
