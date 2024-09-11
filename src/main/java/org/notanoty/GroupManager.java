@@ -2,13 +2,10 @@ package org.notanoty;
 
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
-import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
-import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberUpdated;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -16,6 +13,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.List;
 
 public class GroupManager implements LongPollingSingleThreadUpdateConsumer
@@ -32,6 +30,57 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
         return telegramClient;
     }
 
+    public void giveStrike(Long chat_id, String username, String dateOfIssue)
+    {
+
+        String findUserQuery = "SELECT user_id FROM users WHERE username = ? ";
+        String strikeQuery = "INSERT INTO strikes (chat_id, user_id, username, date_of_issue) VALUES (?, ?, ?, ?)";
+        try
+        {
+            Connection connection = DB.connect();
+
+            PreparedStatement preparedStatementFindUserId = connection.prepareStatement(findUserQuery);
+            preparedStatementFindUserId.setString(1, username);
+
+            ResultSet resultSet = preparedStatementFindUserId.executeQuery();
+            long user_id = 0;
+            if (resultSet.next())
+            {
+                user_id = resultSet.getLong("user_id");
+                System.out.println("User ID for username '" + username + "' is: " + user_id);
+            }
+            else
+            {
+                System.out.println("No user found with username: " + username);
+                preparedStatementFindUserId.close();
+                connection.close();
+                return;
+            }
+
+            PreparedStatement preparedStatementStrike = connection.prepareStatement(strikeQuery);
+
+            preparedStatementStrike.setLong(1, chat_id);
+            preparedStatementStrike.setLong(2, user_id);
+            preparedStatementStrike.setString(3, username);
+            preparedStatementStrike.setString(4, dateOfIssue);
+
+
+            int rowsInserted = preparedStatementStrike.executeUpdate();
+
+            if (rowsInserted > 0)
+            {
+                System.out.println("A new strike record was inserted successfully!");
+            }
+
+            preparedStatementStrike.close();
+            connection.close();
+
+        } catch (SQLException e)
+        {
+            // Handle any SQL exceptions
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void consume(Update update)
@@ -44,7 +93,6 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
             long chatId = update.getMessage().getChatId();
             List<String> words = List.of(message_text.split(" "));
             String query = "SELECT COUNT(*) FROM users WHERE users.user_id = ?";
-            String queryInsert = "INSERT INTO users (user_id, username, first_name, last_name) VALUES (?, ?, ?, ?)";
             PreparedStatement preparedStatement = null;
 
             try (Connection connection = DB.connect())
@@ -60,26 +108,9 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
                     int count = resultSet.getInt(1); // Get the count from the result
                     if (count == 0)
                     {
+                        BotUser.addUser(telegramClient, update, connection);
                         System.out.println("User with ID " + Math.toIntExact(update.getMessage().getFrom().getId()) + " is not present in the table.");
-                        try (PreparedStatement preparedStatementInsert = connection.prepareStatement(queryInsert)) {
-                            // Retrieve user information
-                            int userId = Math.toIntExact(update.getMessage().getFrom().getId());
-                            String username = update.getMessage().getFrom().getUserName();
-                            String firstName = update.getMessage().getFrom().getFirstName();
-                            String lastName = update.getMessage().getFrom().getLastName();
 
-                            // Set values for the insert statement
-                            preparedStatementInsert.setInt(1, userId);
-                            preparedStatementInsert.setString(2, username);
-                            preparedStatementInsert.setString(3, firstName);
-                            preparedStatementInsert.setString(4, lastName);
-
-                            // Execute the insert
-                            int rowsAffected = preparedStatementInsert.executeUpdate();
-                            if (rowsAffected > 0) {
-                                System.out.println("User with ID " + userId + " successfully added to the table.");
-                            }
-                        }
                     }
                     else
                     {
@@ -94,92 +125,76 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
 
 
             System.out.println(words);
-            switch (words.getFirst())
+            try
             {
-                case "/start" ->
+                switch (words.getFirst())
                 {
-                    // User send /start
-                    SendMessage message = SendMessage // Create a message object object
-                            .builder()
-                            .chatId(chatId)
-                            .text(message_text)
-                            .build();
-                    try
+                    case "/start" ->
                     {
+                        SendMessage message = SendMessage
+                                .builder()
+                                .chatId(chatId)
+                                .text(message_text)
+                                .build();
+                        telegramClient.execute(message);
+                    }
+                    case "/test" ->
+                    {
+                        Message message = update.getMessage();
+                        System.out.println(message.getFrom());
+                        System.out.println(message.getChat());
+                    }
+                    case "/strike" ->
+                    {
+                        Message message = update.getMessage();
+                        if (words.size() >= 2)
+                        {
+                            this.giveStrike(message.getChatId(), words.get(1).substring(1), message.getDate().toString());
+
+                            SendMessage messageOutcome = SendMessage
+                                    .builder()
+                                    .chatId(chatId)
+                                    .text("The strike is given to user ".concat(words.get(1)))
+                                    .build();
+                            telegramClient.execute(messageOutcome);
+                        }
+                        else
+                        {
+                            System.out.println("Strike should have a user");
+                        }
+
+                    }
+                    case "/markup" ->
+                    {
+                        SendMessage message = SendMessage
+                                .builder()
+                                .chatId(chatId)
+                                .text("Here is your keyboard")
+                                .build();
+
+                        message.setReplyMarkup(ReplyKeyboardMarkup
+                                .builder()
+                                .keyboardRow(new KeyboardRow("/seeMyInfo", "/strike", "/help"))
+                                .build());
                         telegramClient.execute(message); // Sending our message object to user
-                    } catch (TelegramApiException e)
+                    }
+                    case "/seeMyInfo" ->
                     {
-                        e.printStackTrace();
+                        BotUser.seeMyInfo(telegramClient, update);
+                    }
+                    default ->
+                    {
+                        System.out.println("Unknown command");
+                        System.out.println(words);
                     }
                 }
-                case "/test" ->
-                {
-
-                    Message message = update.getMessage();
-                    System.out.println(message.getFrom());
-                    System.out.println(message.getChat());
-
-
-                }
-                case "/pic" ->
-                {
-                    // User sent /pic
-                    SendPhoto msg = SendPhoto
-                            .builder()
-                            .chatId(chatId)
-                            .photo(new InputFile("https://png.pngtree.com/background/20230519/original/pngtree-this-is-a-picture-of-a-tiger-cub-that-looks-straight-picture-image_2660243.jpg"))
-                            .caption("This is a little cat :)")
-                            .build();
-                    try
-                    {
-                        telegramClient.execute(msg); // Call method to send the photo
-                    } catch (TelegramApiException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-                case "/markup" ->
-                {
-                    SendMessage message = SendMessage // Create a message object object
-                            .builder()
-                            .chatId(chatId)
-                            .text("Here is your keyboard")
-                            .build();
-
-                    // Add the keyboard to the message
-                    message.setReplyMarkup(ReplyKeyboardMarkup
-                            .builder()
-                            // Add first row of 3 buttons
-                            .keyboardRow(new KeyboardRow("Row 1 Button 1", "Row 1 Button 2", "Row 1 Button 3"))
-                            // Add second row of 3 buttons
-                            .keyboardRow(new KeyboardRow("Row 2 Button 1", "Row 2 Button 2", "Row 2 Button 3"))
-                            .build());
-                    try
-                    {
-                        telegramClient.execute(message); // Sending our message object to user
-                    } catch (TelegramApiException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-                default ->
-                {
-                    // Unknown command
-                    SendMessage message = SendMessage // Create a message object object
-                            .builder()
-                            .chatId(chatId)
-                            .text("Unknown command")
-                            .build();
-                    try
-                    {
-                        telegramClient.execute(message); // Sending our message object to user
-                    } catch (TelegramApiException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
+            } catch (TelegramApiException e)
+            {
+                e.printStackTrace();
             }
         }
 
     }
+
+
 }

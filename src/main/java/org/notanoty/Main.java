@@ -12,21 +12,10 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Properties;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main
 {
     public static void main(String[] args)
     {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        try (Connection connection = DB.connect())
-        {
-            System.out.println("Connected to the PostgreSQL database.");
-        } catch (SQLException e)
-        {
-            System.err.println(e.getMessage());
-        }
         System.out.println("Hello and welcome!");
         Properties prop = new Properties();
         ClassLoader classloader = Thread.currentThread().getContextClassLoader();
