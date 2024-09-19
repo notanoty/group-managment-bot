@@ -56,16 +56,6 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
             {
                 switch (words.getFirst())
                 {
-                    case "/start":
-                    {
-                        SendMessage message = SendMessage
-                                .builder()
-                                .chatId(chatId)
-                                .text(message_text)
-                                .build();
-                        telegramClient.execute(message);
-                        break;
-                    }
                     case "/test":
                     {
                         Message message = update.getMessage();
@@ -91,33 +81,12 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
                         }
                         else
                         {
-                            List<String> usernames = BotUser.getGroupUsernamesFromChat(message.getChatId());
-                            usernames.replaceAll(s -> "/s @" + s);
-                            System.out.println(Chat.getGroupUsersIdFromChat(message.getChatId()));
-                            System.out.println("Strike should have a user");
-
-                            SendMessage strikeMessage = SendMessage
-                                    .builder()
-                                    .chatId(chatId)
-                                    .text("Which user do you want to strike?")
-                                    .build();
-
-                            List<KeyboardRow> keyboardRows = new ArrayList<>();
-                            KeyboardRow row = new KeyboardRow();
-                            row.addAll(usernames); // Add all usernames to a single row
-                            keyboardRows.add(row);
-
-                            ReplyKeyboardMarkup replyKeyboardMarkup = ReplyKeyboardMarkup
-                                    .builder()
-                                    .keyboard(keyboardRows)
-                                    .build();
-
-                            strikeMessage.setReplyMarkup(replyKeyboardMarkup);
-
-                            telegramClient.execute(strikeMessage);
+                            Strike.giveStrikeWithoutUser(telegramClient, message);
                         }
                         break;
                     }
+                    case "/help":
+                    case "/start":
                     case "/markup":
                     {
                         SendMessage message = SendMessage

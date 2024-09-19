@@ -20,11 +20,107 @@ public class BotUser
 
     }
 
+    public static List<String> getChatsWithStrikeCounts(long userId)
+    {
+        List<String> chatNamesWithCounts = new ArrayList<>();
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try
+        {
+            connection = DB.connect();
+
+            String sql = "SELECT c.chat_name, COUNT(s.chat_id) AS strike_count " +
+                    "FROM chats c " +
+                    "JOIN strikes s ON c.chat_id = s.chat_id " +
+                    "WHERE s.user_id = ? " +
+                    "GROUP BY c.chat_name";
+
+            stmt = connection.prepareStatement(sql);
+            stmt.setLong(1, userId);
+
+            rs = stmt.executeQuery();
+
+            while (rs.next())
+            {
+                String chatName = rs.getString("chat_name");
+                int strikeCount = rs.getInt("strike_count");
+//                chatNamesWithCounts.add("In chat \"" + chatName + "\" you have " + strikeCount + " strike(s)" );
+                chatNamesWithCounts.add(" \"" + chatName + "\" - " + strikeCount + " strike(s)" );
+            }
+
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+        } finally
+        {
+            try
+            {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (connection != null) connection.close();
+            } catch (SQLException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        return chatNamesWithCounts;
+    }
+
+    public static List<String> getChatsWithStrikes(int userId)
+    {
+        List<String> chatNames = new ArrayList<>();
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try
+        {
+            connection = DB.connect();
+
+            String sql = "SELECT c.chat_name " +
+                    "FROM chats c " +
+                    "JOIN strikes s ON c.chat_id = s.chat_id " +
+                    "WHERE s.user_id = ?";
+
+            stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, userId);
+
+            rs = stmt.executeQuery();
+
+            while (rs.next())
+            {
+                String chatName = rs.getString("chat_name");
+                chatNames.add(chatName);
+            }
+
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+        } finally
+        {
+            try
+            {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (connection != null) connection.close();
+            } catch (SQLException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        return chatNames;
+    }
+
     public static void seeMyInfo(TelegramClient telegramClient, Update update) throws TelegramApiException
     {
         System.out.println(update.getMessage().getChatId());
-
-        SendMessage SendUserInfo = SendMessage.builder().chatId(update.getMessage().getFrom().getId()).text("info").build();
+        System.out.println(BotUser.getChatsWithStrikeCounts(update.getMessage().getFrom().getId()));
+        String text =  "Here is your info:\n" + String.join("\n", BotUser.getChatsWithStrikeCounts(update.getMessage().getFrom().getId()));
+        SendMessage SendUserInfo = SendMessage.builder().chatId(update.getMessage().getFrom().getId()).text(text).build();
         telegramClient.execute(SendUserInfo);
     }
 
