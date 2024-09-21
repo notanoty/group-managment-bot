@@ -66,7 +66,7 @@ public class Strike
 
     public static void giveStrikeWithoutUser(TelegramClient telegramClient, Message message) throws TelegramApiException
     {
-        List<String> usernames = BotUser.getGroupUsernamesFromChat(message.getChatId());
+        List<String> usernames = Chat.getGroupUsernamesFromChat(message.getChatId());
         usernames.replaceAll(s -> "/s @" + s);
         System.out.println(Chat.getGroupUsersIdFromChat(message.getChatId()));
 

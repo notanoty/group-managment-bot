@@ -47,7 +47,7 @@ public class BotUser
                 String chatName = rs.getString("chat_name");
                 int strikeCount = rs.getInt("strike_count");
 //                chatNamesWithCounts.add("In chat \"" + chatName + "\" you have " + strikeCount + " strike(s)" );
-                chatNamesWithCounts.add(" \"" + chatName + "\" - " + strikeCount + " strike(s)" );
+                chatNamesWithCounts.add(" \"" + chatName + "\" - " + strikeCount + " strike(s)");
             }
 
         } catch (SQLException e)
@@ -119,7 +119,7 @@ public class BotUser
     {
         System.out.println(update.getMessage().getChatId());
         System.out.println(BotUser.getChatsWithStrikeCounts(update.getMessage().getFrom().getId()));
-        String text =  "Here is your info:\n" + String.join("\n", BotUser.getChatsWithStrikeCounts(update.getMessage().getFrom().getId()));
+        String text = "Here is your info:\n" + String.join("\n", BotUser.getChatsWithStrikeCounts(update.getMessage().getFrom().getId()));
         SendMessage SendUserInfo = SendMessage.builder().chatId(update.getMessage().getFrom().getId()).text(text).build();
         telegramClient.execute(SendUserInfo);
     }
@@ -144,12 +144,12 @@ public class BotUser
                 if (count == 0)
                 {
                     BotUser.addUserGlobal(telegramClient, update, connection);
-                    System.out.println("User with ID " + Math.toIntExact(update.getMessage().getFrom().getId()) + " is not present in the table.");
+//                    System.out.println("User with ID " + Math.toIntExact(update.getMessage().getFrom().getId()) + " is not present in the table.");
 
                 }
                 else
                 {
-                    System.out.println("User with ID " + Math.toIntExact(update.getMessage().getFrom().getId()) + " exists in the table.");
+//                    System.out.println("User with ID " + Math.toIntExact(update.getMessage().getFrom().getId()) + " exists in the table.");
                 }
 
             }
@@ -219,20 +219,34 @@ public class BotUser
         return username;
     }
 
-    public static List<String> getGroupUsernamesFromChat(long chatId)
+    public static Long getUserIdByUsername(String username)
     {
-        List<Long> userIds = Chat.getGroupUsersIdFromChat(chatId);
+        Long user_id = null;
 
-        List<String> usernames = new ArrayList<>();
-
-        for (Long userId : userIds)
+        String findUserIdQuery = "SELECT user_id FROM users WHERE username = ?";
+        try
         {
-            String username = BotUser.getUsernameByUserId(userId);
-            if (username != null)
+            Connection connection = DB.connect();
+
+            PreparedStatement preparedStatementFindUsername = connection.prepareStatement(findUserIdQuery);
+            preparedStatementFindUsername.setString(1, username);
+
+            ResultSet resultSet = preparedStatementFindUsername.executeQuery();
+
+            if (resultSet.next())
             {
-                usernames.add(username);
+                user_id = resultSet.getLong("user_id");
             }
+
+            resultSet.close();
+            preparedStatementFindUsername.close();
+            connection.close();
+
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
         }
-        return usernames;
+
+        return user_id;
     }
 }
