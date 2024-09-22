@@ -25,7 +25,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-//TODO change give strike system + roles
 
 public class GroupManager implements LongPollingSingleThreadUpdateConsumer
 {
