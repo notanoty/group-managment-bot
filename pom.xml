@@ -6,7 +6,7 @@
 
     <groupId>org.notanoty</groupId>
     <artifactId>GroupManagmentTelegramBot</artifactId>
-    <version>0.1-ALPHA</version>
+    <version>0.1-alpha</version>
 
     <properties>
         <maven.compiler.source>22</maven.compiler.source>
