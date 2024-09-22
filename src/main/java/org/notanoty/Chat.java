@@ -78,7 +78,7 @@ public class Chat
 
     }
 
-    public static void addNewChatIfNotExist(TelegramClient telegramClient, Update update)
+    public static boolean addNewChatIfNotExist(TelegramClient telegramClient, Update update)
     {
 
         String query = "SELECT COUNT(*) FROM chats WHERE chats.chat_id = ?";
@@ -95,10 +95,12 @@ public class Chat
                 if (count == 0)
                 {
                     Chat.addChat(telegramClient, update, connection);
+                    return true;
 //                    System.out.println("Chat with ID " + update.getMessage().getChatId() + " was not present in the table (chats).");
                 }
                 else
                 {
+                    return false;
 //                    System.out.println("Chat with ID " + update.getMessage().getChatId() + " exists in the table (chats).");
                 }
             }
@@ -107,6 +109,8 @@ public class Chat
         {
             throw new RuntimeException(e);
         }
+
+        return false;
 
     }
 

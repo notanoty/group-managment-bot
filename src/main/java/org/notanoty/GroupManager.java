@@ -2,9 +2,14 @@ package org.notanoty;
 
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChat;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMemberCount;
 import org.telegram.telegrambots.meta.api.methods.polls.SendPoll;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.chat.ChatFullInfo;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.polls.Poll;
 import org.telegram.telegrambots.meta.api.objects.polls.PollAnswer;
@@ -49,21 +54,30 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
         return telegramClient;
     }
 
+    public void sendMessageToChat(long chatId, String text) throws TelegramApiException
+    {
+        SendMessage message = SendMessage.builder().chatId(chatId).text(text).build();
+        telegramClient.execute(message);
+    }
+
     @Override
     public void consume(Update update)
     {
         try
         {
+
             if (update.hasMessage() && update.getMessage().hasText())
             {
-
                 long chatId = update.getMessage().getChatId();
                 String message_text = update.getMessage().getText();
 
                 List<String> words = List.of(message_text.split(" "));
-
-                BotUser.addNewUserIfNotExist(telegramClient, update);
-                Chat.addNewChatIfNotExist(telegramClient, update);
+                System.out.println(words);
+                if (Chat.addNewChatIfNotExist(telegramClient, update))
+                {
+                    chatInit(chatId);
+                    return;
+                }
                 Chat.addNewUserToChatIfNotExist(telegramClient, update);
 
                 PollAnswer pollRes = update.getPollAnswer();
@@ -138,6 +152,7 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
         {
             e.printStackTrace();
         }
+
     }
 
 
@@ -173,7 +188,7 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
         if (poll.getOptions().size() == 2 && poll.getOptions().getFirst().getText().equals("Yes") && poll.getOptions().get(1).getText().equals("No"))
         {
             ActivePollInfo info = activeStrikePollsMap.get(poll.getId());
-            int amountOfUsers = Chat.getGroupUsersAmount(info.getChatID());
+            int amountOfUsers = getChatMembersCountWithoutBots(info.getChatID());
             System.out.println("ChatID: " + info.getChatID() + " amountOfUsers: " + amountOfUsers);
             int votesYes = poll.getOptions().getFirst().getVoterCount();
             int votesNo = poll.getOptions().get(1).getVoterCount();
@@ -182,7 +197,8 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
             System.out.println("Amount of users: " + amountOfUsers);
             if (currentVotes == amountOfUsers)
             {
-                if(votesYes >= votesNo){
+                if (votesYes >= votesNo)
+                {
                     Strike.giveStrike(
                             info.getChatID(),
                             BotUser.getUsernameByUserId(info.getUserID()),
@@ -194,7 +210,8 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
                             .build();
                     telegramClient.execute(messageOutcome);
                 }
-                else{
+                else
+                {
                     SendMessage messageOutcome = SendMessage
                             .builder()
                             .chatId(info.getChatID())
@@ -207,6 +224,7 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
         }
 
     }
+
 
     private void sendPoll(long chatId) throws TelegramApiException
     {
@@ -236,4 +254,90 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
         Message pollMessage = telegramClient.execute(poll);
         addActivePoll(pollMessage.getPoll().getId(), chatId, userId);
     }
+
+    public boolean isUserAdmin(long chatId, long userId)
+    {
+        try
+        {
+            GetChatMember getChatMember = GetChatMember.builder()
+                    .chatId(chatId)
+                    .userId(userId)
+                    .build();
+
+            ChatMember chatMember = telegramClient.execute(getChatMember);
+
+            String status = chatMember.getStatus();
+            if (status.equals("administrator"))
+            {
+                return true;  // The user is an admin
+            }
+
+        } catch (TelegramApiException e)
+        {
+            e.printStackTrace();
+        }
+
+        return false;  // The user is not an admin
+    }
+
+    public boolean isUserCreator(long chatId, long userId)
+    {
+        try
+        {
+            GetChatMember getChatMember = GetChatMember.builder()
+                    .chatId(chatId)
+                    .userId(userId)
+                    .build();
+
+            ChatMember chatMember = telegramClient.execute(getChatMember);
+
+            String status = chatMember.getStatus();
+            if (status.equals("creator"))
+            {
+                return true;
+            }
+
+        } catch (TelegramApiException e)
+        {
+            e.printStackTrace();
+        }
+
+        return false;  // The user is not an admin
+    }
+
+    public int getChatMembersCount(long chatId) throws TelegramApiException
+    {
+        GetChatMemberCount getChatMemberCount = GetChatMemberCount.builder().chatId(chatId).build();
+        return telegramClient.execute(getChatMemberCount);
+    }
+
+    public int getChatMembersCountWithoutBots(long chatId) throws TelegramApiException //TODO make it support other bots
+    {
+        GetChatMemberCount getChatMemberCount = GetChatMemberCount.builder().chatId(chatId).build();
+        return telegramClient.execute(getChatMemberCount) - 1;
+    }
+
+    public ChatMember getChatMember(long chatId, long userId) throws TelegramApiException
+    {
+        GetChatMember getChatMember = GetChatMember.builder().chatId(chatId).userId(userId).build();
+        return telegramClient.execute(getChatMember);
+    }
+
+    public ChatFullInfo getChat(long chatId) throws TelegramApiException
+    {
+        GetChat getChat = GetChat.builder().chatId(chatId).build();
+        return telegramClient.execute(getChat);
+    }
+
+    public void chatInit(long chatId) throws TelegramApiException
+    {
+
+        sendMessageToChat(chatId, "This new chat for me.");
+        sendMessageToChat(chatId, "Let's do some preparations first.");
+        sendMessageToChat(chatId, "Right now I need an owner to setup this chat, otherwise it will use default settings.");
+        sendMessageToChat(chatId, "Use /setup to see what you can do.");
+
+    }
+
+
 }
