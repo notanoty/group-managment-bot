@@ -1,14 +1,91 @@
 package org.notanoty;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Role
 {
-    public static Roles getRole(double chat_id, double user_id)
+    public static Roles getRole(long chat_id, long user_id)
     {
-        return Roles.SUPER_USER;
+
+        String findUserQuery = "SELECT * FROM roles WHERE chat_id = ? and user_id  = ?";
+        try
+        {
+            Connection connection = DB.connect();
+
+            PreparedStatement preparedStatementFindUserId = connection.prepareStatement(findUserQuery);
+            preparedStatementFindUserId.setLong(1, chat_id);
+            preparedStatementFindUserId.setLong(2, user_id);
+
+            ResultSet resultSet = preparedStatementFindUserId.executeQuery();
+
+            if (resultSet.next())
+            {
+
+                String role = resultSet.getString("role");
+                resultSet.close();
+                preparedStatementFindUserId.close();
+                connection.close();
+                return Role.roleToEnum(role);
+            }
+            else
+            {
+                System.out.println("The user wasn't found");
+                resultSet.close();
+                preparedStatementFindUserId.close();
+                connection.close();
+            }
+
+
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return Roles.ERROR_USER;
     }
 
-    public static void setRole(double chat_id, double user_id)
+    public static void setRole(long chat_id, long user_id, Roles role)
     {
 
+        String strikeQuery = "INSERT INTO roles (chat_id, user_id, role) VALUES (?, ?, ?)";
+        try
+        {
+            Connection connection = DB.connect();
+
+            PreparedStatement preparedStatementStrike = connection.prepareStatement(strikeQuery);
+
+            preparedStatementStrike.setLong(1, chat_id);
+            preparedStatementStrike.setLong(2, user_id);
+            preparedStatementStrike.setString(3, role.toString());
+
+            int rowsInserted = preparedStatementStrike.executeUpdate();
+
+            if (rowsInserted > 0)
+            {
+                System.out.println("A new strike record was inserted successfully!");
+            }
+
+            preparedStatementStrike.close();
+            connection.close();
+
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public static Roles roleToEnum(String role)
+    {
+        return switch (role)
+        {
+            case "SUPER_USER" -> Roles.SUPER_USER;
+            case "ADMIN" -> Roles.ADMIN;
+            case "USER" -> Roles.NORMAL_USER;
+            default -> Roles.ERROR_USER;
+        };
     }
 }

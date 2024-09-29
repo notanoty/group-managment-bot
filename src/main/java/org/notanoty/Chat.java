@@ -96,12 +96,10 @@ public class Chat
                 {
                     Chat.addChat(telegramClient, update, connection);
                     return true;
-//                    System.out.println("Chat with ID " + update.getMessage().getChatId() + " was not present in the table (chats).");
                 }
                 else
                 {
                     return false;
-//                    System.out.println("Chat with ID " + update.getMessage().getChatId() + " exists in the table (chats).");
                 }
             }
 

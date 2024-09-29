@@ -64,6 +64,35 @@ public class Strike
         }
     }
 
+    public static void giveStrike(Long chat_id, Long user_id, String dateOfIssue)
+    {
+        String strikeQuery = "INSERT INTO strikes (chat_id, user_id, date_of_issue) VALUES (?, ?,  ?)";
+        try
+        {
+            Connection connection = DB.connect();
+
+
+            PreparedStatement preparedStatementStrike = connection.prepareStatement(strikeQuery);
+
+            preparedStatementStrike.setLong(1, chat_id);
+            preparedStatementStrike.setLong(2, user_id);
+            preparedStatementStrike.setString(3, dateOfIssue);
+
+            int rowsInserted = preparedStatementStrike.executeUpdate();
+
+            if (rowsInserted > 0)
+            {
+                System.out.println("A new strike record was inserted successfully!");
+            }
+
+            preparedStatementStrike.close();
+            connection.close();
+
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
     public static void giveStrikeWithoutUser(TelegramClient telegramClient, Message message) throws TelegramApiException
     {
         List<String> usernames = Chat.getGroupUsernamesFromChat(message.getChatId());
@@ -77,9 +106,13 @@ public class Strike
                 .build();
 
         List<KeyboardRow> keyboardRows = new ArrayList<>();
-        KeyboardRow row = new KeyboardRow();
-        row.addAll(usernames);
-        keyboardRows.add(row);
+        for (String username : usernames)
+        {
+
+            KeyboardRow row = new KeyboardRow();
+            row.add(username);
+            keyboardRows.add(row);
+        }
 
         ReplyKeyboardMarkup replyKeyboardMarkup = ReplyKeyboardMarkup
                 .builder()

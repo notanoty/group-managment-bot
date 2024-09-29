@@ -12,7 +12,6 @@ import org.telegram.telegrambots.meta.api.objects.chat.ChatFullInfo;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.polls.Poll;
-import org.telegram.telegrambots.meta.api.objects.polls.PollAnswer;
 import org.telegram.telegrambots.meta.api.objects.polls.PollOption;
 import org.telegram.telegrambots.meta.api.objects.polls.input.InputPollOption;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -68,10 +67,13 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
             if (update.hasMessage() && update.getMessage().hasText())
             {
                 long chatId = update.getMessage().getChatId();
-                String message_text = update.getMessage().getText();
+                long messageId = update.getMessage().getMessageId();
+                long userId = update.getMessage().getFrom().getId();
 
-                List<String> words = List.of(message_text.split(" "));
-                System.out.println(words);
+                String messageText = update.getMessage().getText();
+
+                List<String> words = List.of(messageText.split(" "));
+                
                 if (Chat.addNewChatIfNotExist(telegramClient, update))
                 {
                     chatInit(chatId);
@@ -79,20 +81,9 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
                 }
                 Chat.addNewUserToChatIfNotExist(telegramClient, update);
 
-                PollAnswer pollRes = update.getPollAnswer();
-
-
                 String command = GroupManager.getCommand(words.getFirst());
                 switch (command)
                 {
-                    case "/test":
-                    {
-                        Message message = update.getMessage();
-                        System.out.println(message.getFrom());
-                        System.out.println(message.getChat());
-                        System.out.println(message);
-                        break;
-                    }
                     case "/strike":
                     case "/s":
                     {
@@ -100,8 +91,20 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
                         if (words.size() >= 2)
                         {
                             String username = words.get(1).substring(1);
-
-                            makeStrikePole(chatId, BotUser.getUserIdByUsername(username));
+                            if (GroupManager.isUserCreatorOrAdmin(chatId, userId, telegramClient))
+                            {
+                                Strike.giveStrike(chatId, username, LocalDate.now().toString());
+                                this.sendMessageToChat(chatId, "Strike was given to the user @" + username);
+                            }
+                            else if (Role.getRole(chatId, userId) == Roles.SUPER_USER)
+                            {
+                                Strike.giveStrike(chatId, username, LocalDate.now().toString());
+                                this.sendMessageToChat(chatId, "Strike was given to the user @" + username + " by a superuser");
+                            }
+                            else
+                            {
+                                makeStrikePole(chatId, BotUser.getUserIdByUsername(username));
+                            }
                         }
                         else
                         {
@@ -127,6 +130,7 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
                         break;
                     }
                     case "/seeMyInfo":
+                    case "/seemyinfo":
                     {
                         BotUser.seeMyInfo(telegramClient, update);
                         break;
@@ -200,23 +204,16 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
                 {
                     Strike.giveStrike(
                             info.getChatID(),
-                            BotUser.getUsernameByUserId(info.getUserID()),
+                            info.getUserID(),
                             LocalDate.now().toString());
-                    SendMessage messageOutcome = SendMessage
-                            .builder()
-                            .chatId(info.getChatID())
-                            .text("The strike is given to user @".concat(BotUser.getUsernameByUserId(info.getUserID())))
-                            .build();
-                    telegramClient.execute(messageOutcome);
+                    sendMessageToChat(
+                            info.getChatID(),
+                            "The strike is given to user @".concat(BotUser.getUsernameByUserId(info.getUserID())));
                 }
                 else
                 {
-                    SendMessage messageOutcome = SendMessage
-                            .builder()
-                            .chatId(info.getChatID())
-                            .text("The strike is not given to user @".concat(BotUser.getUsernameByUserId(info.getUserID())))
-                            .build();
-                    telegramClient.execute(messageOutcome);
+                    sendMessageToChat(info.getChatID(), "The strike is not given to user @".concat(BotUser.getUsernameByUserId(info.getUserID())));
+
                 }
             }
 
@@ -254,7 +251,7 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
         addActivePoll(pollMessage.getPoll().getId(), chatId, userId);
     }
 
-    public boolean isUserAdmin(long chatId, long userId)
+    public static boolean isUserAdmin(long chatId, long userId, TelegramClient telegramClient)
     {
         try
         {
@@ -268,7 +265,7 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
             String status = chatMember.getStatus();
             if (status.equals("administrator"))
             {
-                return true;  // The user is an admin
+                return true;
             }
 
         } catch (TelegramApiException e)
@@ -276,10 +273,10 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
             e.printStackTrace();
         }
 
-        return false;  // The user is not an admin
+        return false;
     }
 
-    public boolean isUserCreator(long chatId, long userId)
+    public static boolean isUserCreator(long chatId, long userId, TelegramClient telegramClient)
     {
         try
         {
@@ -304,6 +301,31 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
         return false;  // The user is not an admin
     }
 
+    public static boolean isUserCreatorOrAdmin(long chatId, long userId, TelegramClient telegramClient)
+    {
+        try
+        {
+            GetChatMember getChatMember = GetChatMember.builder()
+                    .chatId(chatId)
+                    .userId(userId)
+                    .build();
+
+            ChatMember chatMember = telegramClient.execute(getChatMember);
+
+            String status = chatMember.getStatus();
+            if (status.equals("creator") || status.equals("administrator"))
+            {
+                return true;
+            }
+
+        } catch (TelegramApiException e)
+        {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    
     public int getChatMembersCount(long chatId) throws TelegramApiException
     {
         GetChatMemberCount getChatMemberCount = GetChatMemberCount.builder().chatId(chatId).build();

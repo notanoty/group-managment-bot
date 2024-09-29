@@ -22,11 +22,8 @@ Right now the environment for setting up a bot is not ready.
 
 ## TODO
 1. Strikes
-    1. Make roles affect the voting.
-    2. Polishing of existing methods 
-    3. Change strike method
-    4. Make personalised settings for the group
-    5. Small code refactoring 
+    1. Polishing of existing methods 
+    2. Make personalised settings for the group
 2. Goals
    1. Start goals system
 3. Store file
