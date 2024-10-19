@@ -1,5 +1,6 @@
 package org.notanoty;
 
+import org.notanoty.DB.DB;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 

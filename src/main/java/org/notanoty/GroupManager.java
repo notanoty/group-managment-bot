@@ -1,5 +1,6 @@
 package org.notanoty;
 
+import org.notanoty.scheduler.Scheduler;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChat;
@@ -20,7 +21,11 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,12 +34,13 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
 {
     private final TelegramClient telegramClient;
     private HashMap<String, ActivePollInfo> activeStrikePollsMap;
-
+    private final Scheduler scheduler;
 
     public GroupManager(String token)
     {
         this.telegramClient = new OkHttpTelegramClient(token);
         this.activeStrikePollsMap = new HashMap<String, ActivePollInfo>();
+        this.scheduler = new Scheduler(this.telegramClient);
     }
 
     public HashMap<String, ActivePollInfo> getActiveStrikePollsMap()
@@ -50,6 +56,11 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
     public TelegramClient getTelegramClient()
     {
         return telegramClient;
+    }
+
+    public Scheduler getScheduler()
+    {
+        return scheduler;
     }
 
     public void sendMessageToChat(long chatId, String text) throws TelegramApiException
@@ -73,7 +84,7 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
                 String messageText = update.getMessage().getText();
 
                 List<String> words = List.of(messageText.split(" "));
-                
+
                 if (Chat.addNewChatIfNotExist(telegramClient, update))
                 {
                     chatInit(chatId);
@@ -139,9 +150,14 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
                     {
                         sendPoll(chatId);
                     }
+                    case "/sch":
+                    {
+                        getScheduler().makeScheduledTask(chatId, "bi bi bo bo", LocalDate.of(2024,10, 19), LocalTime.of(13, 30));
+                        break;
+                    }
                     default:
                     {
-                        System.out.println("Unknown command: " + words);
+                        System.out.println(Colors.RED + "Unknown command: " + Colors.RESET + words);
                     }
                 }
             }
@@ -298,7 +314,7 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
             e.printStackTrace();
         }
 
-        return false;  // The user is not an admin
+        return false;
     }
 
     public static boolean isUserCreatorOrAdmin(long chatId, long userId, TelegramClient telegramClient)
@@ -325,7 +341,14 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
         return false;
     }
 
-    
+    public void sendScheduledMessage(long chatId, String text) throws TelegramApiException
+    {
+        SendMessage message = SendMessage.builder().chatId(chatId).text(text).build();
+        System.out.println(Colors.GREEN  + "Info" + Colors.RESET + ": Scheduled message is sent");
+        telegramClient.execute(message);
+    }
+
+
     public int getChatMembersCount(long chatId) throws TelegramApiException
     {
         GetChatMemberCount getChatMemberCount = GetChatMemberCount.builder().chatId(chatId).build();
@@ -352,12 +375,10 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
 
     public void chatInit(long chatId) throws TelegramApiException
     {
-
         sendMessageToChat(chatId, "This new chat for me.");
         sendMessageToChat(chatId, "Let's do some preparations first.");
         sendMessageToChat(chatId, "Right now I need an owner to setup this chat, otherwise it will use default settings.");
         sendMessageToChat(chatId, "Use /setup to see what you can do.");
-
     }
 
 

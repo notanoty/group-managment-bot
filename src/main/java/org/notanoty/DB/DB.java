@@ -1,4 +1,4 @@
-package org.notanoty;
+package org.notanoty.DB;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

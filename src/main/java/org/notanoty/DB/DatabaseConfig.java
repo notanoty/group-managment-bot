@@ -1,4 +1,4 @@
-package org.notanoty;
+package org.notanoty.DB;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -13,7 +13,6 @@ public class DatabaseConfig {
                 System.exit(1);
             }
 
-            // Load the properties file
             properties.load(input);
         } catch (IOException e) {
             e.printStackTrace();

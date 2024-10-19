@@ -1,5 +1,6 @@
 package org.notanoty;
 
+import org.notanoty.DB.DB;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -46,7 +47,6 @@ public class BotUser
             {
                 String chatName = rs.getString("chat_name");
                 int strikeCount = rs.getInt("strike_count");
-//                chatNamesWithCounts.add("In chat \"" + chatName + "\" you have " + strikeCount + " strike(s)" );
                 chatNamesWithCounts.add(" \"" + chatName + "\" - " + strikeCount + " strike(s)");
             }
 
@@ -117,8 +117,7 @@ public class BotUser
 
     public static void seeMyInfo(TelegramClient telegramClient, Update update) throws TelegramApiException
     {
-        System.out.println(update.getMessage().getChatId());
-        System.out.println(BotUser.getChatsWithStrikeCounts(update.getMessage().getFrom().getId()));
+        System.out.println(Colors.GREEN + "Info" + Colors.RESET + ": " + BotUser.getChatsWithStrikeCounts(update.getMessage().getFrom().getId()));
         String text = "Here is your info:\n" + String.join("\n", BotUser.getChatsWithStrikeCounts(update.getMessage().getFrom().getId()));
         SendMessage SendUserInfo = SendMessage.builder().chatId(update.getMessage().getFrom().getId()).text(text).build();
         telegramClient.execute(SendUserInfo);
@@ -126,7 +125,6 @@ public class BotUser
 
     public static void addNewUserIfNotExist(TelegramClient telegramClient, Update update)
     {
-
         String query = "SELECT COUNT(*) FROM users WHERE users.user_id = ?";
         PreparedStatement preparedStatement = null;
 
@@ -134,24 +132,16 @@ public class BotUser
         {
             preparedStatement = connection.prepareStatement(query);
             preparedStatement.setInt(1, Math.toIntExact(update.getMessage().getFrom().getId()));
-            // Execute the query
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            // Check the result
             if (resultSet.next())
             {
                 int count = resultSet.getInt(1); // Get the count from the result
                 if (count == 0)
                 {
                     BotUser.addUserGlobal(telegramClient, update, connection);
-//                    System.out.println("User with ID " + Math.toIntExact(update.getMessage().getFrom().getId()) + " is not present in the table.");
 
                 }
-                else
-                {
-//                    System.out.println("User with ID " + Math.toIntExact(update.getMessage().getFrom().getId()) + " exists in the table.");
-                }
-
             }
 
             preparedStatement.close();

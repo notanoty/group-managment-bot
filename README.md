@@ -23,8 +23,10 @@ Right now the environment for setting up a bot is not ready.
 ## TODO
 1. Strikes
     1. Polishing of existing methods 
-    2. Make personalised settings for the group
+    2. Make personalised settings for the group 
 2. Goals
    1. Start goals system
 3. Store file
    1. Start file storage 
+4. General
+   1. Make setup command  

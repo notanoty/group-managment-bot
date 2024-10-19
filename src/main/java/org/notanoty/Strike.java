@@ -1,5 +1,6 @@
 package org.notanoty;
 
+import org.notanoty.DB.DB;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -32,7 +33,6 @@ public class Strike
             if (resultSet.next())
             {
                 user_id = resultSet.getLong("user_id");
-                System.out.println("User ID for username '" + username + "' is: " + user_id);
             }
             else
             {
@@ -52,7 +52,7 @@ public class Strike
 
             if (rowsInserted > 0)
             {
-                System.out.println("A new strike record was inserted successfully!");
+                System.out.println(Colors.GREEN + "Info" + Colors.RESET + ": Strike was given to user " + Colors.YELLOW +  username + " " + user_id + " " + dateOfIssue + Colors.RESET);
             }
 
             preparedStatementStrike.close();
