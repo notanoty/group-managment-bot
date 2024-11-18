@@ -1,5 +1,6 @@
-package org.notanoty;
+package org.notanoty.User;
 
+import org.notanoty.Colors;
 import org.notanoty.DB.DB;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;

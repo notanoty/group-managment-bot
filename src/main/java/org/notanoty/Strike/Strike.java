@@ -1,7 +1,15 @@
-package org.notanoty;
+package org.notanoty.Strike;
 
+import org.notanoty.Chat.Chat;
+import org.notanoty.Colors;
 import org.notanoty.DB.DB;
+import org.notanoty.GroupManager;
+import org.notanoty.Poll.StrikePoll;
+import org.notanoty.Role.Role;
+import org.notanoty.Role.Roles;
+import org.notanoty.User.BotUser;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -12,6 +20,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -122,5 +131,34 @@ public class Strike
         strikeMessage.setReplyMarkup(replyKeyboardMarkup);
 
         telegramClient.execute(strikeMessage);
+    }
+
+
+    public static void strikeHandling(Update update, List<String> words, long chatId, long userId, TelegramClient telegramClient) throws TelegramApiException
+    {
+        Message message = update.getMessage();
+        if (words.size() >= 2)
+        {
+            String username = words.get(1).substring(1);
+            if (Chat.isUserCreatorOrAdmin(chatId, userId, telegramClient) && false)
+            {
+                Strike.giveStrike(chatId, username, LocalDate.now().toString());
+                GroupManager.sendMessageToChat(chatId, "Strike was given to the user @" + username, telegramClient);
+            }
+
+//            else if (Role.getRole(chatId, userId) == Roles.SUPER_USER)
+//            {
+//                Strike.giveStrike(chatId, username, LocalDate.now().toString());
+//                GroupManager.sendMessageToChat(chatId, "Strike was given to the user @" + username + " by a superuser", telegramClient);
+//            }
+            else
+            {
+                StrikePoll.makeStrikePole(chatId, BotUser.getUserIdByUsername(username), telegramClient);
+            }
+        }
+        else
+        {
+            Strike.giveStrikeWithoutUser(telegramClient, message);
+        }
     }
 }

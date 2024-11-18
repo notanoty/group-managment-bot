@@ -1,4 +1,4 @@
-package org.notanoty;
+package org.notanoty.Poll;
 
 public class ActivePollInfo
 {

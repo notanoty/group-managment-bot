@@ -1,4 +1,4 @@
-package org.notanoty;
+package org.notanoty.Role;
 
 public enum Roles
 {

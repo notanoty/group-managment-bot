@@ -12,7 +12,7 @@ If you have a group member that does not follow the regulations this member can 
 
 ### Setup goals
 
-Inside the chat the users are able to set up goals gor their activities. The chat bot will remined about this goals ad notify if they are reached or not. Information about the goal can be retrieved inside the personal chat with the bot. 
+Inside the chat the users are able to set up goals or their activities. The chat bot will remined about this goals ad notify if they are reached or not. Information about the goal can be retrieved inside the personal chat with the bot. 
 
 ### Store small files
 If the project requires a lot of documentation the bot can store  files up to 10 MB (if hosted this value can be adjusted). This will help to store important files inside a group chat.  
@@ -22,8 +22,7 @@ Right now the environment for setting up a bot is not ready.
 
 ## TODO
 1. Strikes
-    1. Polishing of existing methods 
-    2. Make personalised settings for the group 
+   1. Make personalised settings for the group 
 2. Goals
    1. Start goals system
 3. Store file

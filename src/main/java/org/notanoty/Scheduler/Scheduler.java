@@ -1,5 +1,6 @@
-package org.notanoty.scheduler;
+package org.notanoty.Scheduler;
 
+import org.notanoty.Colors;
 import org.notanoty.DB.DB;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -42,8 +43,15 @@ public class Scheduler
             try
             {
                 System.out.println("Checking database for scheduled tasks...");
-                testSendScheduledNotification();
-//                sendScheduledNotifications();
+                ScheduledTask task = Scheduler.getScheduledTaskByDateTime(LocalDate.now(), LocalTime.now());
+                if (task != null)
+                {
+                    sendScheduledNotifications(task);
+                }
+                else
+                {
+                    System.out.println(Colors.YELLOW + "Worning" + Colors.RESET + ": No scheduled tasks found for scheduled tasks.");
+                }
             } catch (Exception e)
             {
                 e.printStackTrace();
@@ -53,23 +61,29 @@ public class Scheduler
         scheduler.scheduleAtFixedRate(checkTask, 0, 15, TimeUnit.SECONDS);
     }
 
-    public void testSendScheduledNotification() {
+    public void testSendScheduledNotification()
+    {
         LocalDate date = LocalDate.of(2024, 10, 19);
         LocalTime time = LocalTime.of(13, 30);
 
         ScheduledTask task = Scheduler.getScheduledTaskByDateTime(date, time);
 
-        if (task != null) {
+        if (task != null)
+        {
             System.out.println("Scheduled task found: " + task);
             sendScheduledNotifications(task);
-        } else {
+        }
+        else
+        {
             System.out.println("No scheduled task found at 13:30 on " + date + ".");
         }
     }
 
-    private void sendScheduledNotifications(ScheduledTask task) {
+    private void sendScheduledNotifications(ScheduledTask task)
+    {
         System.out.println("Sending notifications to the groups...");
-        try {
+        try
+        {
             SendMessage message = SendMessage.builder()
                     .chatId(task.getChatId())
                     .text(task.getMessage())
@@ -78,60 +92,69 @@ public class Scheduler
             telegramClient.execute(message);
 
             System.out.println("Notification sent to chat: " + task.getChatId());
-        } catch (TelegramApiException e) {
+        } catch (TelegramApiException e)
+        {
             e.printStackTrace();
         }
     }
 
-    public static void makeScheduledTask(long chatId, String message, LocalDate date, LocalTime time) {
+    public static void makeScheduledTask(long chatId, String message, LocalDate date, LocalTime time)
+    {
         String queryCheck = "SELECT COUNT(*) FROM scheduled_task WHERE chat_id = ? AND date = ? AND time = ?";
         String queryInsert = "INSERT INTO scheduled_task (chat_id, message, date, time) VALUES (?, ?, ?, ?)";
         PreparedStatement preparedStatement = null;
 
-        try (Connection connection = DB.connect()) {
-            // Check if a task already exists for the given chat, date, and time
+        try (Connection connection = DB.connect())
+        {
             preparedStatement = connection.prepareStatement(queryCheck);
             preparedStatement.setLong(1, chatId);
-            preparedStatement.setDate(2, java.sql.Date.valueOf(date)); // Set the date parameter
-            preparedStatement.setTime(3, java.sql.Time.valueOf(time)); // Set the time parameter
+            preparedStatement.setDate(2, java.sql.Date.valueOf(date));
+            preparedStatement.setTime(3, java.sql.Time.valueOf(time));
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            if (resultSet.next()) {
+            if (resultSet.next())
+            {
                 int count = resultSet.getInt(1);
-                if (count == 0) {
-                    // No task exists, so insert the new task
+                if (count == 0)
+                {
                     preparedStatement = connection.prepareStatement(queryInsert);
                     preparedStatement.setLong(1, chatId);
                     preparedStatement.setString(2, message);
-                    preparedStatement.setDate(3, java.sql.Date.valueOf(date)); // Insert date
-                    preparedStatement.setTime(4, java.sql.Time.valueOf(time)); // Insert time
+                    preparedStatement.setDate(3, java.sql.Date.valueOf(date));
+                    preparedStatement.setTime(4, java.sql.Time.valueOf(time));
                     preparedStatement.executeUpdate();
                     System.out.println("New scheduled task created for chat: " + chatId);
-                } else {
+                }
+                else
+                {
                     System.out.println("Task already exists for this chat, date, and time.");
                 }
             }
 
             resultSet.close();
             preparedStatement.close();
-        } catch (SQLException e) {
+        } catch (SQLException e)
+        {
             throw new RuntimeException(e);
         }
     }
 
-    public static ScheduledTask getScheduledTaskByDateTime(LocalDate date, LocalTime time) {
+    public static ScheduledTask getScheduledTaskByDateTime(LocalDate date, LocalTime time)
+    {
         String query = "SELECT * FROM scheduled_task WHERE date = ? AND time = ?";
         PreparedStatement preparedStatement = null;
         ScheduledTask task = null;
 
-        try (Connection connection = DB.connect()) {
+        try (Connection connection = DB.connect())
+        {
             preparedStatement = connection.prepareStatement(query);
             preparedStatement.setDate(1, java.sql.Date.valueOf(date)); // Set the date parameter
             preparedStatement.setTime(2, java.sql.Time.valueOf(time)); // Set the time parameter
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            if (resultSet.next()) {
+            if (resultSet.next())
+            {
                 long chatId = resultSet.getLong("chat_id");
                 String message = resultSet.getString("message");
                 LocalDate scheduledDate = resultSet.getDate("date").toLocalDate();
@@ -142,7 +165,8 @@ public class Scheduler
 
             resultSet.close();
             preparedStatement.close();
-        } catch (SQLException e) {
+        } catch (SQLException e)
+        {
             e.printStackTrace();
             throw new RuntimeException(e);
         }

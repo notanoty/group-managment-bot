@@ -1,4 +1,4 @@
-package org.notanoty.scheduler;
+package org.notanoty.Scheduler;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
