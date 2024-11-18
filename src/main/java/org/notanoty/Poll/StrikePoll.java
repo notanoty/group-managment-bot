@@ -33,7 +33,6 @@ public class StrikePoll
     {
         System.out.println("Poll ID: " + poll.getId());
         System.out.println("Poll Question: " + poll.getQuestion());
-//        System.out.println("Poll: " + poll);
         List<PollOption> pollOptions = poll.getOptions();
         for (PollOption option : pollOptions)
         {

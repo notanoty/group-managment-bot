@@ -2,6 +2,7 @@ package org.notanoty.Strike;
 
 import org.notanoty.Chat.Chat;
 import org.notanoty.Colors;
+import org.notanoty.ConsoleMessages.ConsoleMessages;
 import org.notanoty.DB.DB;
 import org.notanoty.GroupManager;
 import org.notanoty.Poll.StrikePoll;
@@ -61,7 +62,7 @@ public class Strike
 
             if (rowsInserted > 0)
             {
-                System.out.println(Colors.GREEN + "Info" + Colors.RESET + ": Strike was given to user " + Colors.YELLOW +  username + " " + user_id + " " + dateOfIssue + Colors.RESET);
+                ConsoleMessages.printInfo("Strike was given to user " + Colors.YELLOW + username + " " + user_id + " " + dateOfIssue + Colors.RESET);
             }
 
             preparedStatementStrike.close();
@@ -102,6 +103,7 @@ public class Strike
             e.printStackTrace();
         }
     }
+
     public static void giveStrikeWithoutUser(TelegramClient telegramClient, Message message) throws TelegramApiException
     {
         List<String> usernames = Chat.getGroupUsernamesFromChat(message.getChatId());

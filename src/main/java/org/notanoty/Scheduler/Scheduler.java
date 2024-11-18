@@ -1,6 +1,7 @@
 package org.notanoty.Scheduler;
 
 import org.notanoty.Colors;
+import org.notanoty.ConsoleMessages.ConsoleMessages;
 import org.notanoty.DB.DB;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -50,7 +51,7 @@ public class Scheduler
                 }
                 else
                 {
-                    System.out.println(Colors.YELLOW + "Worning" + Colors.RESET + ": No scheduled tasks found for scheduled tasks.");
+                    ConsoleMessages.printWarning("No scheduled tasks found for scheduled tasks.");
                 }
             } catch (Exception e)
             {

@@ -1,6 +1,7 @@
 package org.notanoty;
 
 import org.notanoty.Chat.Chat;
+import org.notanoty.ConsoleMessages.ConsoleMessages;
 import org.notanoty.Poll.ActivePollInfo;
 import org.notanoty.Poll.StrikePoll;
 import org.notanoty.Strike.Strike;
@@ -123,7 +124,7 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
                     }
                     default:
                     {
-                        System.out.println(Colors.RED + "Unknown command: " + Colors.RESET + words);
+                        ConsoleMessages.printError("Unknown command", String.valueOf(words));
                     }
                 }
             }
@@ -180,7 +181,7 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
     public void sendScheduledMessage(long chatId, String text) throws TelegramApiException
     {
         SendMessage message = SendMessage.builder().chatId(chatId).text(text).build();
-        System.out.println(Colors.GREEN + "Info" + Colors.RESET + ": Scheduled message is sent");
+        ConsoleMessages.printInfo("Scheduled message is sent");
         telegramClient.execute(message);
     }
 

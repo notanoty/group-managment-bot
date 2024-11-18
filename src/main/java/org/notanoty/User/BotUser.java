@@ -1,6 +1,8 @@
 package org.notanoty.User;
 
+import org.notanoty.Chat.Chat;
 import org.notanoty.Colors;
+import org.notanoty.ConsoleMessages.ConsoleMessages;
 import org.notanoty.DB.DB;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -118,7 +120,7 @@ public class BotUser
 
     public static void seeMyInfo(TelegramClient telegramClient, Update update) throws TelegramApiException
     {
-        System.out.println(Colors.GREEN + "Info" + Colors.RESET + ": " + BotUser.getChatsWithStrikeCounts(update.getMessage().getFrom().getId()));
+        ConsoleMessages.printInfo(String.valueOf(BotUser.getChatsWithStrikeCounts(update.getMessage().getFrom().getId())));
         String text = "Here is your info:\n" + String.join("\n", BotUser.getChatsWithStrikeCounts(update.getMessage().getFrom().getId()));
         SendMessage SendUserInfo = SendMessage.builder().chatId(update.getMessage().getFrom().getId()).text(text).build();
         telegramClient.execute(SendUserInfo);

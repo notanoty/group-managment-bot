@@ -1,6 +1,7 @@
 package org.notanoty.Role;
 
 import org.notanoty.Colors;
+import org.notanoty.ConsoleMessages.ConsoleMessages;
 import org.notanoty.DB.DB;
 
 import java.sql.Connection;
@@ -35,7 +36,7 @@ public class Role
             }
             else
             {
-                System.out.println(Colors.RED + "Error" + Colors.RESET + ": The user wasn't found");
+                ConsoleMessages.printError("The user wasn't found");
                 resultSet.close();
                 preparedStatementFindUserId.close();
                 connection.close();
