@@ -1,12 +1,11 @@
-package com.notanoty.demo.user;
+package com.notanoty.demo.User;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.notanoty.demo.member.Member;
+import com.notanoty.demo.Member.Member;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.Set;
-import java.util.UUID;
 
 @Data
 @Entity
@@ -14,12 +13,8 @@ import java.util.UUID;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")  // Explicit column name
-    @JsonProperty("user_id")
+    @Column(name = "user_id")
     private Long userId;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Member> members;
 
     @JsonProperty("first_name")
     private String firstName;

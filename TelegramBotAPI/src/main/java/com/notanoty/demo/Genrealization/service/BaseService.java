@@ -1,4 +1,4 @@
-package com.notanoty.demo.genrealization.service;
+package com.notanoty.demo.Genrealization.service;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

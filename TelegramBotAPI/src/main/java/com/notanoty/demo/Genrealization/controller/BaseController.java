@@ -1,6 +1,6 @@
-package com.notanoty.demo.genrealization.controller;
+package com.notanoty.demo.Genrealization.controller;
 
-import com.notanoty.demo.genrealization.service.ServiceBase;
+import com.notanoty.demo.Genrealization.service.ServiceBase;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

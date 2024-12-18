@@ -1,4 +1,4 @@
-package com.notanoty.demo.role;
+package com.notanoty.demo.Role;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -8,23 +8,13 @@ import jakarta.persistence.*;
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "role_id", nullable = false, unique = true) // Explicit settings
     private Long roleId;
 
-    @JsonProperty("name")
     private String name;
-
-    @JsonProperty("description")
     private String description;
-
-    @JsonProperty("is_admin")
     private Boolean isAdmin;
-
-    @JsonProperty("can_add_tasks")
     private Boolean canAddTasks;
-
-    @JsonProperty("can_edit_tasks")
     private Boolean canMakePolls;
-
-    @JsonProperty("can_give_strikes_without_poll")
     private Boolean canGiveStrikesWithoutPoll;
 }

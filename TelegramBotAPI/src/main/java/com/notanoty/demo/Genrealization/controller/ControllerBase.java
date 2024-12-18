@@ -1,4 +1,4 @@
-package com.notanoty.demo.genrealization.controller;
+package com.notanoty.demo.Genrealization.controller;
 
 import java.util.List;
 import java.util.Optional;

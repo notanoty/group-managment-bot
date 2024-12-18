@@ -1,8 +1,8 @@
 CREATE TABLE chats (
  chat_id INT NOT NULL,
  name CHAR(10),
- members_amount CHAR(10),
- bots_amount CHAR(10)
+ members_count CHAR(10),
+ bots_count CHAR(10)
 );
 
 ALTER TABLE chats ADD CONSTRAINT PK_chats PRIMARY KEY (chat_id);
@@ -20,7 +20,7 @@ CREATE TABLE roles (
 ALTER TABLE roles ADD CONSTRAINT PK_roles PRIMARY KEY (role_id);
 
 
-CREATE TABLE sheduled_tasks_chat (
+CREATE TABLE sheduled_tasks (
  sheduled_tasks_chat_id INT NOT NULL,
  chat_id INT NOT NULL,
  task_name VARCHAR(10) NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE sheduled_tasks_chat (
  date_of_expire TIMESTAMP(10) NOT NULL
 );
 
-ALTER TABLE sheduled_tasks_chat ADD CONSTRAINT PK_sheduled_tasks_chat PRIMARY KEY (sheduled_tasks_chat_id);
+ALTER TABLE sheduled_tasks ADD CONSTRAINT PK_sheduled_tasks PRIMARY KEY (sheduled_tasks_chat_id);
 
 
 CREATE TABLE users (
@@ -61,9 +61,12 @@ ALTER TABLE members ADD CONSTRAINT PK_members PRIMARY KEY (member_id);
 
 
 CREATE TABLE strikes (
+ strike_id CHAR(10) NOT NULL,
  member_id INT,
  chat_id INT
 );
+
+ALTER TABLE strikes ADD CONSTRAINT PK_strikes PRIMARY KEY (strike_id);
 
 
 CREATE TABLE chat_members (
@@ -74,7 +77,7 @@ CREATE TABLE chat_members (
 ALTER TABLE chat_members ADD CONSTRAINT PK_chat_members PRIMARY KEY (chat_id,member_id);
 
 
-ALTER TABLE sheduled_tasks_chat ADD CONSTRAINT FK_sheduled_tasks_chat_0 FOREIGN KEY (chat_id) REFERENCES chats (chat_id);
+ALTER TABLE sheduled_tasks ADD CONSTRAINT FK_sheduled_tasks_0 FOREIGN KEY (chat_id) REFERENCES chats (chat_id);
 
 
 ALTER TABLE chat_settings ADD CONSTRAINT FK_chat_settings_0 FOREIGN KEY (chat_id) REFERENCES chats (chat_id);
