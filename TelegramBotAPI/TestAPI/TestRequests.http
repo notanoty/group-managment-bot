@@ -82,3 +82,19 @@ GET localhost:8080/scheduled-task
 
 ### Get chat
 GET localhost:8080/chat
+
+###  Strike
+
+### Get strike
+GET localhost:8080/strike
+
+### User
+
+### Get user
+GET localhost:8080/user
+
+
+### Member
+
+### Get member
+GET localhost:8080/member

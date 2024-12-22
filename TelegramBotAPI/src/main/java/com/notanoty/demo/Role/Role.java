@@ -2,7 +2,11 @@ package com.notanoty.demo.Role;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "roles")
 public class Role {

@@ -37,4 +37,8 @@ public abstract class BaseService<T, ID> implements ServiceBase<T, ID> {
         }
         repository.deleteById(id);
     };
+
+    public JpaRepository<T, ID> getRepository() {
+        return repository;
+    }
 }

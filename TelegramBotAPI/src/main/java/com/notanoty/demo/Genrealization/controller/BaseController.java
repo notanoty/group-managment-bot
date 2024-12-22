@@ -17,6 +17,7 @@ public abstract class BaseController<T, ID> implements ControllerBase<T, ID> {
     public List<T> getAll() {
         return service.findAll();
     }
+
     @GetMapping("/{id}")
     public Optional<T> getById(@PathVariable ID id) {
         return service.findById(id);
@@ -36,4 +37,9 @@ public abstract class BaseController<T, ID> implements ControllerBase<T, ID> {
     public void delete(@PathVariable ID id) {
         service.deleteById(id);
     }
+
+    public ServiceBase<T, ID> getService() {
+        return service;
+    }
+
 }
