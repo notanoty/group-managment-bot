@@ -1,5 +1,6 @@
 package com.notanoty.demo.Strike;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.notanoty.demo.Chat.Chat;
 import com.notanoty.demo.Chat.ChatDto;
 import com.notanoty.demo.Member.Member;
@@ -23,6 +24,7 @@ public class Strike {
 
     @ManyToOne
     @JoinColumn(name = "chat_id")
+    @JsonBackReference
     private Chat chat;
 
     public MemberDto getMember() {

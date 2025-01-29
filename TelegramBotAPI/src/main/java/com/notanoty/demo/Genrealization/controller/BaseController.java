@@ -47,7 +47,7 @@ public abstract class BaseController<T, ID> implements ControllerBase<T, ID> {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable ID id) {
         service.deleteById(id);
-        return ApiResponse.success(null, "Entity deleted successfully.");
+        return ApiResponse.makeResponse(null, "Entity deleted successfully.", HttpStatus.NO_CONTENT);
     }
 
     public ServiceBase<T, ID> getService() {

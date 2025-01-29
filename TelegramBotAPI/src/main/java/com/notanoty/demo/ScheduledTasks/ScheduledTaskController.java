@@ -12,37 +12,35 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/scheduled-task")
-public class ScheduledTaskController
+public class ScheduledTaskController extends BaseController<ScheduledTask, Long>
 {
-    private final ScheduledTaskService scheduledTaskService;
-
     public ScheduledTaskController(ScheduledTaskService service)
     {
-        this.scheduledTaskService = service;
+        super(service);
     }
 
-    @GetMapping
-    public ResponseEntity<List<ScheduledTaskDto>>  getAll() {
-        List<ScheduledTaskDto> taskDtos = scheduledTaskService.getAllScheduledTasks();
-        return ResponseEntity.ok(taskDtos);
-    }
-
-    @PostMapping
-    public ScheduledTask create(@RequestBody ScheduledTask entity) {
-        return scheduledTaskService.save(entity);
-    }
-
-    @PutMapping("/{id}")
-    public ScheduledTask update(@PathVariable Long id, @RequestBody ScheduledTask entity) {
-        return scheduledTaskService.update(id, entity);
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        scheduledTaskService.deleteById(id);
-    }
-
-    public ServiceBase<ScheduledTask, Long> getService() {
-        return scheduledTaskService;
-    }
+//    @GetMapping
+//    public ResponseEntity<List<ScheduledTaskDto>>  getAll() {
+//        List<ScheduledTaskDto> taskDtos = scheduledTaskService.getAllScheduledTasks();
+//        return ResponseEntity.ok(taskDtos);
+//    }
+//
+//    @PostMapping
+//    public ScheduledTask create(@RequestBody ScheduledTask entity) {
+//        return scheduledTaskService.save(entity);
+//    }
+//
+//    @PutMapping("/{id}")
+//    public ScheduledTask update(@PathVariable Long id, @RequestBody ScheduledTask entity) {
+//        return scheduledTaskService.update(id, entity);
+//    }
+//
+//    @DeleteMapping("/{id}")
+//    public void delete(@PathVariable Long id) {
+//        scheduledTaskService.deleteById(id);
+//    }
+//
+//    public ServiceBase<ScheduledTask, Long> getService() {
+//        return scheduledTaskService;
+//    }
 }

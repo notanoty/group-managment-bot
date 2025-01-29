@@ -16,16 +16,14 @@ public class User {
     @Column(name = "user_id")
     private Long userId;
 
-    @JsonProperty("first_name")
+    @Column(name = "first_name")
     private String firstName;
 
-    @JsonProperty("last_name")
+    @Column(name = "last_name")
     private String lastName;
 
-    @JsonProperty("login")
     private String login;
 
-    @JsonProperty("password")
     private String password;
 
 }
