@@ -1,6 +1,8 @@
 package com.notanoty.demo.Strike;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.notanoty.demo.Chat.Chat;
 import com.notanoty.demo.Chat.ChatDto;
 import com.notanoty.demo.Member.Member;
@@ -9,6 +11,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
 @Setter
 @Entity
 @Table(name = "strikes")
@@ -16,23 +19,17 @@ public class Strike {
     @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "strike_id")
     private Long strikeId;
 
     @ManyToOne
     @JoinColumn(name = "member_id")
+    @JsonBackReference
     private Member member;
 
-    @ManyToOne
-    @JoinColumn(name = "chat_id")
-    @JsonBackReference
-    private Chat chat;
+    @Column(name = "reason")
+    private String reason;
 
-    public MemberDto getMember() {
-        return new MemberDto(member);
-    }
 
-    public ChatDto getChat() {
-        return new ChatDto(chat);
-    }
 
 }

@@ -1,8 +1,6 @@
 package com.notanoty.demo.Chat;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import com.notanoty.demo.ChatSettings.ChatSettings;
 import com.notanoty.demo.Member.Member;
 import com.notanoty.demo.ScheduledTasks.ScheduledTask;
@@ -18,6 +16,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "chats")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "chatId")
 public class Chat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,6 +32,9 @@ public class Chat {
     @Column(name = "bot_count")
     private Integer botCount;
 
+    @OneToMany(mappedBy = "chat")
+    private List<Member> members;
+
     @OneToOne
     @JoinColumn(name = "chat_settings_id")
     private ChatSettings chatSettings;
@@ -40,15 +42,4 @@ public class Chat {
     @OneToMany(mappedBy = "chat")
     @JsonManagedReference
     private List<ScheduledTask> scheduledTasks;
-
-//    @OneToMany(mappedBy = "chat")
-//    @JsonManagedReference
-//    private List<Member> members;
-
-    @OneToMany(mappedBy = "chat")
-    @JsonManagedReference
-    private List<Strike> strikes;
-
-
-
 }

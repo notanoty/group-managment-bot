@@ -1,6 +1,6 @@
 package com.notanoty.demo.Member;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import com.notanoty.demo.Chat.Chat;
 import com.notanoty.demo.Role.Role;
 import com.notanoty.demo.Strike.Strike;
@@ -15,18 +15,26 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "members")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "memberId")
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
     private Long memberId;
 
-//    @OneToMany(mappedBy = "member")
-//    @JoinColumn(name = "strikes_id")
-//    private Set<Strike> strikes;
+    @Column(name = "member_group_name")
+    private String memberGroupName;
+
+    @OneToMany(mappedBy = "member")
+    @JsonManagedReference
+    private Set<Strike> strikes;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "chat_id")
+    private Chat chat;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", unique = true)
     private User user;
 
     @ManyToOne
