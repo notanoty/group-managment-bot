@@ -29,12 +29,14 @@ public class Member {
     @JsonManagedReference
     private Set<Strike> strikes;
 
+
     @ManyToOne
     @JoinColumn(name = "chat_id")
     private Chat chat;
 
     @ManyToOne
     @JoinColumn(name = "user_id", unique = true)
+    @JsonIgnoreProperties("members")
     private User user;
 
     @ManyToOne

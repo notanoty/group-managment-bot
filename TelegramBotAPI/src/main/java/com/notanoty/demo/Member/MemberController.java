@@ -20,7 +20,7 @@ public class MemberController extends BaseController<Member, Long>
     }
 
     @RequestMapping("/{id}/strike")
-    public Strike giveStrike(@PathVariable Long id, @RequestBody StrikeDTO reason) {
-        return ((MemberService) getService()).giveStrike(id, reason);
+    public Strike giveStrike(@PathVariable Long id, @RequestBody StrikeDTO strikeDTO) {
+        return ((MemberService) getService()).giveStrike(id, strikeDTO);
     }
 }

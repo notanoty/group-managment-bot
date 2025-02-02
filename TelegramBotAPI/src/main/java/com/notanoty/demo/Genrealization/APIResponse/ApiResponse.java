@@ -23,6 +23,12 @@ public class ApiResponse<T> {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    public static <T> ResponseEntity<ApiResponse<T>> successCreated(T data, String message) {
+        ApiResponse<T> response = new ApiResponse<>(data, null, message);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+
     public static <T> ResponseEntity<ApiResponse<T>> error(String errorMessage, String message, HttpStatus status) {
         ApiResponse<T> response = new ApiResponse<>(null, errorMessage, message);
         return new ResponseEntity<>(response, status);

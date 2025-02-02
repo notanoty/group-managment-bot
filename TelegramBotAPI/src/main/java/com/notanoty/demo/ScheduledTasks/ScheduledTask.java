@@ -1,13 +1,10 @@
 package com.notanoty.demo.ScheduledTasks;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.notanoty.demo.Chat.Chat;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
@@ -16,6 +13,7 @@ import java.time.LocalDate;
 @Setter
 @Entity
 @Table(name = "scheduled_task")
+@NoArgsConstructor
 public class ScheduledTask {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,4 +33,5 @@ public class ScheduledTask {
     @JoinColumn(name = "chat_id")
     @JsonBackReference
     private Chat chat;
+
 }

@@ -1,6 +1,7 @@
 package com.notanoty.demo.Strike;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.notanoty.demo.Chat.Chat;
@@ -10,6 +11,8 @@ import com.notanoty.demo.Member.MemberDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -29,6 +32,10 @@ public class Strike {
 
     @Column(name = "reason")
     private String reason;
+
+    @Column(name = "date_of_issue")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate dateOfIssue;
 
 
 

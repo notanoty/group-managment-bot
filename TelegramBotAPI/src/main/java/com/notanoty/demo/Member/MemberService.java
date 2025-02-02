@@ -28,6 +28,7 @@ public class MemberService extends BaseService<Member, Long> {
         Strike strike = new Strike();
         strike.setMember(member);
         strike.setReason(strikeDTO.getReason());
+        strike.setDateOfIssue(strikeDTO.getDateOfIssue());
         return strikeRepository.save(strike);
     }
 }

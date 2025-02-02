@@ -1,5 +1,7 @@
 package com.notanoty.demo.User;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.notanoty.demo.Member.Member;
 import jakarta.persistence.*;
@@ -16,6 +18,9 @@ public class User {
     @Column(name = "user_id")
     private Long userId;
 
+    @Column(name= "telegram_id")
+    private Long telegramId;
+
     @Column(name = "first_name")
     private String firstName;
 
@@ -25,5 +30,9 @@ public class User {
     private String login;
 
     private String password;
+
+    @OneToMany(mappedBy = "user")
+    @JsonIgnoreProperties("user")
+    private Set<Member> members;
 
 }
