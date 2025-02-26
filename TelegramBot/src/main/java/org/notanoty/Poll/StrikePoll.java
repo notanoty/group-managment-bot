@@ -59,7 +59,7 @@ public class StrikePoll
                     Strike.giveStrike(
                             info.getChatID(),
                             info.getUserID(),
-                            LocalDate.now().toString());
+                            LocalDate.now());
                     GroupManager.sendMessageToChat(
                             info.getChatID(),
                             "The strike is given to user @".concat(BotUser.getUsernameByUserId(info.getUserID())), telegramClient);

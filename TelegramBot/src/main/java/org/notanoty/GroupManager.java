@@ -19,143 +19,125 @@ import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import java.time.LocalDate;
 import java.util.*;
 
 
-public class GroupManager implements LongPollingSingleThreadUpdateConsumer
-{
+public class GroupManager implements LongPollingSingleThreadUpdateConsumer {
     private final TelegramClient telegramClient;
     private HashMap<String, ActivePollInfo> activeStrikePollsMap;
     private final Scheduler scheduler;
 
-    public GroupManager(String token)
-    {
+    public GroupManager(String token) {
         this.telegramClient = new OkHttpTelegramClient(token);
         this.activeStrikePollsMap = new HashMap<String, ActivePollInfo>();
         this.scheduler = new Scheduler(this.telegramClient);
     }
 
-    public HashMap<String, ActivePollInfo> getActiveStrikePollsMap()
-    {
+    public HashMap<String, ActivePollInfo> getActiveStrikePollsMap() {
         return activeStrikePollsMap;
     }
 
-    public void setActiveStrikePollsMap(HashMap<String, ActivePollInfo> activeStrikePollsMap)
-    {
+    public void setActiveStrikePollsMap(HashMap<String, ActivePollInfo> activeStrikePollsMap) {
         this.activeStrikePollsMap = activeStrikePollsMap;
     }
 
-    public TelegramClient getTelegramClient()
-    {
+    public TelegramClient getTelegramClient() {
         return telegramClient;
     }
 
-    public Scheduler getScheduler()
-    {
+    public Scheduler getScheduler() {
         return scheduler;
     }
 
-    public void sendMessageToChat(long chatId, String text) throws TelegramApiException
-    {
+    public void sendMessageToChat(long chatId, String text) throws TelegramApiException {
         sendMessageToChat(chatId, text, telegramClient);
     }
 
-    public static void sendMessageToChat(long chatId, String text, TelegramClient telegramClient) throws TelegramApiException
-    {
+    public static void sendMessageToChat(long chatId, String text, TelegramClient telegramClient) throws TelegramApiException {
         SendMessage message = SendMessage.builder().chatId(chatId).text(text).build();
         telegramClient.execute(message);
     }
 
     @Override
-    public void consume(Update update)
-    {
-        try
-        {
-
-            if (update.hasMessage() && update.getMessage().hasText())
-            {
-                long chatId = update.getMessage().getChatId();
-                long messageId = update.getMessage().getMessageId();
-                long userId = update.getMessage().getFrom().getId();
+    public void consume(Update update) {
+        try {
+            if (update.hasMessage() && update.getMessage().hasText()) {
+                long telegramChatId = update.getMessage().getChatId();
+                long telegramMessageId = update.getMessage().getMessageId();
+                long telegramUserId = update.getMessage().getFrom().getId();
 
                 String messageText = update.getMessage().getText();
 
                 List<String> words = List.of(messageText.split(" "));
-
-                if (Chat.addNewChatIfNotExist(telegramClient, update))
-                {
-                    Chat.chatInit(chatId, getTelegramClient());
-                    return;
-                }
-                Chat.addNewUserToChatIfNotExist(telegramClient, update);
+                System.out.println("Words: " + words);
+                Chat.addNewChatIfNotExist( telegramChatId);
+//                {
+//                    Chat.chatInit(telegramChatId, getTelegramClient());
+//                    return;
+//                }
+//                Chat.addNewUserToChatIfNotExist(telegramClient, update);
 
                 String command = GroupManager.getCommand(words.getFirst());
-                switch (command)
-                {
+                System.out.println("Command: " + command);
+                switch (command) {
                     case "/strike":
-                    case "/s":
-                    {
-                        Strike.strikeHandling(update, words, chatId, userId, getTelegramClient());
+                    case "/s": {
+//                        Strike.strikeHandling(update, words, telegramChatId, telegramUserId, getTelegramClient());
+//                        Strike.giveStrike(telegramChatId, telegramUserId, LocalDate.now());
+                        break;
+                    }
+                    case "/test": {
+                        sendMessageToChat(telegramChatId, "Test message", telegramClient);
                         break;
                     }
                     case "/help":
                     case "/start":
-                    case "/markup":
-                    {
-                        Chat.getChatHelp(chatId, getTelegramClient());
+                    case "/markup": {
+//                        Chat.getChatHelp(telegramChatId, getTelegramClient());
                         break;
                     }
                     case "/seeMyInfo":
-                    case "/seemyinfo":
-                    {
-                        BotUser.seeMyInfo(telegramClient, update);
+                    case "/seemyinfo": {
+//                        BotUser.seeMyInfo(telegramClient, update);
                         break;
                     }
-                    case "/vote":
-                    {
-                        StrikePoll.sendPoll(chatId, getTelegramClient());
+                    case "/vote": {
+//                        StrikePoll.sendPoll(telegramChatId, getTelegramClient());
                     }
                     case "/sch":
-                    case "/schedule_task":
-                    {
+                    case "/schedule_task": {
 
-//                        getScheduler().makeScheduledTask(chatId, "bi bi bo bo", LocalDate.of(2024,10, 19), LocalTime.of(13, 30));
+//                        getScheduler().makeScheduledTask(telegramChatId, "bi bi bo bo", LocalDate.of(2024,10, 19), LocalTime.of(13, 30));
                         break;
                     }
-                    default:
-                    {
+                    default: {
                         ConsoleMessages.printError("Unknown command", String.valueOf(words));
                     }
                 }
             }
-            if (update.hasPoll())
-            {
-                StrikePoll.handlePollUpdate(update.getPoll(), getTelegramClient());
-                StrikePoll.pollUpdateInfo(update.getPoll());
-            }
+//            if (update.hasPoll())
+//            {
+//                StrikePoll.handlePollUpdate(update.getPoll(), getTelegramClient());
+//                StrikePoll.pollUpdateInfo(update.getPoll());
+//            }
 
-        } catch (TelegramApiException e)
-        {
+        } catch (TelegramApiException e) {
             e.printStackTrace();
         }
 
     }
 
 
-
-    public static String getCommand(String word)
-    {
-        if (word.indexOf('@') == -1)
-        {
+    public static String getCommand(String word) {
+        if (word.indexOf('@') == -1) {
             return word;
         }
         return word.substring(0, word.indexOf('@'));
     }
 
-    public static boolean isUserAdmin(long chatId, long userId, TelegramClient telegramClient)
-    {
-        try
-        {
+    public static boolean isUserAdmin(long chatId, long userId, TelegramClient telegramClient) {
+        try {
             GetChatMember getChatMember = GetChatMember.builder()
                     .chatId(chatId)
                     .userId(userId)
@@ -164,13 +146,11 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
             ChatMember chatMember = telegramClient.execute(getChatMember);
 
             String status = chatMember.getStatus();
-            if (status.equals("administrator"))
-            {
+            if (status.equals("administrator")) {
                 return true;
             }
 
-        } catch (TelegramApiException e)
-        {
+        } catch (TelegramApiException e) {
             e.printStackTrace();
         }
 
@@ -178,16 +158,14 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
     }
 
 
-    public void sendScheduledMessage(long chatId, String text) throws TelegramApiException
-    {
+    public void sendScheduledMessage(long chatId, String text) throws TelegramApiException {
         SendMessage message = SendMessage.builder().chatId(chatId).text(text).build();
         ConsoleMessages.printInfo("Scheduled message is sent");
         telegramClient.execute(message);
     }
 
 
-    public int getChatMembersCount(long chatId) throws TelegramApiException
-    {
+    public int getChatMembersCount(long chatId) throws TelegramApiException {
         return getChatMembersCount(chatId, telegramClient);
     }
 
@@ -196,14 +174,10 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer
         return Chat.getChatMembersCountWithoutBots(chatId, telegramClient);
     }
 
-    public static int getChatMembersCount(long chatId, TelegramClient telegramClient) throws TelegramApiException
-    {
+    public static int getChatMembersCount(long chatId, TelegramClient telegramClient) throws TelegramApiException {
         GetChatMemberCount getChatMemberCount = GetChatMemberCount.builder().chatId(chatId).build();
         return telegramClient.execute(getChatMemberCount);
     }
-
-
-
 
 
 }

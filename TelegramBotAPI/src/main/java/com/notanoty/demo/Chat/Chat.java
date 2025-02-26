@@ -24,6 +24,9 @@ public class Chat {
     @Column(name = "chat_id")
     private Long chatId;
 
+    @Column(name = "telegram_chat_id")
+    private Long telegramChatId;
+
     private String name;
 
     @Column(name = "members_count")

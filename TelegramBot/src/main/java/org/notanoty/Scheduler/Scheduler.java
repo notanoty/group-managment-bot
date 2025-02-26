@@ -24,7 +24,7 @@ public class Scheduler
     {
         this.telegramClient = telegramClient;
         this.scheduler = Executors.newScheduledThreadPool(1);
-        scheduleDatabaseChecker();
+//        scheduleDatabaseChecker();
     }
 
     public ScheduledExecutorService getScheduler()
@@ -41,22 +41,22 @@ public class Scheduler
     {
         Runnable checkTask = () ->
         {
-            try
-            {
+//            try
+//            {
                 System.out.println("Checking database for scheduled tasks...");
-                ScheduledTask task = Scheduler.getScheduledTaskByDateTime(LocalDate.now(), LocalTime.now());
-                if (task != null)
-                {
-                    sendScheduledNotifications(task);
-                }
-                else
-                {
-                    ConsoleMessages.printWarning("No scheduled tasks found for scheduled tasks.");
-                }
-            } catch (Exception e)
-            {
-                e.printStackTrace();
-            }
+//                ScheduledTask task = Scheduler.getScheduledTaskByDateTime(LocalDate.now(), LocalTime.now());
+//                if (task != null)
+//                {
+//                    sendScheduledNotifications(task);
+//                }
+//                else
+//                {
+//                    ConsoleMessages.printWarning("No scheduled tasks found for scheduled tasks.");
+//                }
+//            } catch (Exception e)
+//            {
+//                e.printStackTrace();
+//            }
         };
 
         scheduler.scheduleAtFixedRate(checkTask, 0, 15, TimeUnit.SECONDS);
@@ -72,7 +72,7 @@ public class Scheduler
         if (task != null)
         {
             System.out.println("Scheduled task found: " + task);
-            sendScheduledNotifications(task);
+//            sendScheduledNotifications(task);
         }
         else
         {

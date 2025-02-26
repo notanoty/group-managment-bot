@@ -3,6 +3,7 @@ package org.notanoty.Chat;
 import org.notanoty.Colors;
 import org.notanoty.DB.DB;
 import org.notanoty.GroupManager;
+import org.notanoty.HttpRequests.HttpClientSingleton;
 import org.notanoty.User.BotUser;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChat;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
@@ -57,111 +58,26 @@ public class Chat
     public static void addNewUserToChatIfNotExist(TelegramClient telegramClient, Update update)
     {
 
-        String query = "SELECT COUNT(*) FROM users_in_chats WHERE users_in_chats.user_id = ? AND users_in_chats.chat_id = ?";
-
-        try (Connection connection = DB.connect())
-        {
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setLong(1, update.getMessage().getFrom().getId());
-            preparedStatement.setLong(2, update.getMessage().getChatId());
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next())
-            {
-                int count = resultSet.getInt(1);
-                if (count == 0)
-                {
-                    Chat.addUserToChatGlobal(telegramClient, update, connection);
-//                    System.out.println("User with ID " + update.getMessage().getFrom().getId() + " was not present in the table (users_in_chats).");
-
-                }
-                else
-                {
-//                    System.out.println("User with ID " + update.getMessage().getFrom().getId() + " exists in the table (users_in_chats).");
-                }
-
-            }
-
-            preparedStatement.close();
-        } catch (SQLException e)
-        {
-            throw new RuntimeException(e);
-        }
 
     }
 
-    public static boolean addNewChatIfNotExist(TelegramClient telegramClient, Update update)
+    public static boolean addNewChatIfNotExist(Long telegramChatId)
     {
-
-        String query = "SELECT COUNT(*) FROM chats WHERE chats.chat_id = ?";
-
-        try (Connection connection = DB.connect())
-        {
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setLong(1, update.getMessage().getChatId());
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next())
-            {
-                int count = resultSet.getInt(1);
-                if (count == 0)
-                {
-                    Chat.addChat(telegramClient, update, connection);
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-        } catch (SQLException e)
-        {
+        try {
+            String response = HttpClientSingleton.sendGetRequest("http://localhost:8080/chat");
+            System.out.println(response);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
         return false;
-
     }
 
     public static List<Long> getGroupUsersIdFromChat(long chat_id)
     {
-        List<Long> userIds = new ArrayList<>();
-
-        String findUserQuery = "SELECT user_id FROM users_in_chats WHERE chat_id = ?";
-        try
-        {
-            Connection connection = DB.connect();
-
-            PreparedStatement preparedStatementFindUserId = connection.prepareStatement(findUserQuery);
-            preparedStatementFindUserId.setLong(1, chat_id);
-
-            ResultSet resultSet = preparedStatementFindUserId.executeQuery();
-
-            while (resultSet.next())
-            {
-                userIds.add(resultSet.getLong("user_id"));
-            }
-
-
-            resultSet.close();
-            preparedStatementFindUserId.close();
-            connection.close();
-
-        } catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-
-        return userIds;
+        return null;
     }
 
-    public static int getGroupUsersAmount(long chat_id)
-    {
-        List<Long> userIds = getGroupUsersIdFromChat(chat_id);
 
-        return userIds.size();
-    }
 
     public static List<String> getGroupUsernamesFromChat(long chatId)
     {
