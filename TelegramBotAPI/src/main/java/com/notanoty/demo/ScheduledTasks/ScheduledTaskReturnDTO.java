@@ -6,14 +6,14 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-public class ScheduledTaskDto {
+public class ScheduledTaskReturnDTO {
     private Long scheduledTasksChatId;
     private String taskName;
     private String taskDescription;
     private LocalDate dateOfExpire;
     private ChatDto chat;
 
-    public ScheduledTaskDto(ScheduledTask task) {
+    public ScheduledTaskReturnDTO(ScheduledTask task) {
         this.scheduledTasksChatId = task.getScheduledTasksChatId();
         this.taskName = task.getTaskName();
         this.taskDescription = task.getTaskDescription();

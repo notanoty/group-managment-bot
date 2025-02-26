@@ -22,6 +22,10 @@ public class ApiResponse<T> {
         ApiResponse<T> response = new ApiResponse<>(data, null, message);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    public static <T> ResponseEntity<ApiResponse<T>> successNoContent(String message) {
+        ApiResponse<T> response = new ApiResponse<>(null, null, message);
+        return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
+    }
 
     public static <T> ResponseEntity<ApiResponse<T>> successCreated(T data, String message) {
         ApiResponse<T> response = new ApiResponse<>(data, null, message);
