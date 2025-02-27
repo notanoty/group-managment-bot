@@ -70,16 +70,13 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer {
                 String messageText = update.getMessage().getText();
 
                 List<String> words = List.of(messageText.split(" "));
-                System.out.println("Words: " + words);
-                Chat.addNewChatIfNotExist( telegramChatId);
-//                {
-//                    Chat.chatInit(telegramChatId, getTelegramClient());
-//                    return;
-//                }
-//                Chat.addNewUserToChatIfNotExist(telegramClient, update);
+
+                Chat.addNewChatIfNotExist(telegramChatId, update.getMessage().getChat().getTitle());
+                Chat.addNewUserToChatIfNotExist(telegramChatId, telegramUserId, update.getMessage().getFrom().getUserName(), update.getMessage().getFrom().getFirstName(), update.getMessage().getFrom().getLastName());
 
                 String command = GroupManager.getCommand(words.getFirst());
                 System.out.println("Command: " + command);
+                System.out.println("Update: " + update);
                 switch (command) {
                     case "/strike":
                     case "/s": {
@@ -178,6 +175,6 @@ public class GroupManager implements LongPollingSingleThreadUpdateConsumer {
         GetChatMemberCount getChatMemberCount = GetChatMemberCount.builder().chatId(chatId).build();
         return telegramClient.execute(getChatMemberCount);
     }
-
-
 }
+
+

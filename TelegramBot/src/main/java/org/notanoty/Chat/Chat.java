@@ -1,5 +1,6 @@
 package org.notanoty.Chat;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.notanoty.Colors;
 import org.notanoty.DB.DB;
 import org.notanoty.GroupManager;
@@ -19,7 +20,9 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Chat
 {
@@ -55,21 +58,53 @@ public class Chat
         }
     }
 
-    public static void addNewUserToChatIfNotExist(TelegramClient telegramClient, Update update)
+    public static void addNewUserToChatIfNotExist(Long telegramChatId, Long telegramUserId, String userName, String firstName, String lastName)
+    {
+        try {
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("telegramChatId", telegramChatId);
+            requestBody.put("telegramUserId", telegramUserId);
+            requestBody.put("userName", userName);
+            requestBody.put("firstName", firstName);
+            requestBody.put("lastName", lastName);
+
+            // Convert the map to a JSON string
+            JsonNode response = HttpClientSingleton.sendPostRequest("http://localhost:8080/user/create-if-not-exist" , requestBody);
+            if(!response.get("error").isNull()){
+                System.out.println(Colors.RED + response.get("error").asText() + Colors.RESET);
+            }
+            else{
+                System.out.println(Colors.GREEN + response.get("message").asText() + Colors.RESET);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
     {
 
 
     }
 
-    public static boolean addNewChatIfNotExist(Long telegramChatId)
+    public static void addNewChatIfNotExist(Long telegramChatId, String title)
     {
         try {
-            String response = HttpClientSingleton.sendGetRequest("http://localhost:8080/chat");
-            System.out.println(response);
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("telegramChatId", telegramChatId);
+            requestBody.put("chatName", title);
+
+            // Convert the map to a JSON string
+            JsonNode response = HttpClientSingleton.sendPostRequest("http://localhost:8080/chat/create-if-not-exist" , requestBody);
+            if(!response.get("error").isNull()){
+                System.out.println(Colors.RED + response.get("error").asText() + Colors.RESET);
+            }
+            else{
+                System.out.println(Colors.GREEN + response.get("message").asText() + Colors.RESET);
+            }
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return false;
     }
 
     public static List<Long> getGroupUsersIdFromChat(long chat_id)

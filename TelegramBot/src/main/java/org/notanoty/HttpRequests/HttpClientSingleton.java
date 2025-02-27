@@ -5,6 +5,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class HttpClientSingleton {
@@ -12,7 +14,7 @@ public class HttpClientSingleton {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     // GET Request
-    public static String sendGetRequest(String url) throws Exception {
+    public static JsonNode sendGetRequest(String url) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .GET()
@@ -20,11 +22,12 @@ public class HttpClientSingleton {
                 .build();
 
         HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-        return response.body();
+        JsonNode jsonNode = OBJECT_MAPPER.readTree(response.body());
+        return jsonNode;
     }
 
     // POST Request
-    public static String sendPostRequest(String url, Object requestBody) throws Exception {
+    public static JsonNode sendPostRequest(String url, Object requestBody) throws Exception {
         String jsonRequest = OBJECT_MAPPER.writeValueAsString(requestBody);
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -34,11 +37,12 @@ public class HttpClientSingleton {
                 .build();
 
         HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-        return response.body();
+        JsonNode jsonNode = OBJECT_MAPPER.readTree(response.body());
+        return jsonNode;
     }
 
     // PUT Request
-    public static String sendPutRequest(String url, Object requestBody) throws Exception {
+    public static JsonNode sendPutRequest(String url, Object requestBody) throws Exception {
         String jsonRequest = OBJECT_MAPPER.writeValueAsString(requestBody);
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -48,7 +52,8 @@ public class HttpClientSingleton {
                 .build();
 
         HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-        return response.body();
+        JsonNode jsonNode = OBJECT_MAPPER.readTree(response.body());
+        return jsonNode;
     }
 
     // DELETE Request

@@ -3,12 +3,12 @@ package com.notanoty.demo.Chat;
 import lombok.Data;
 
 @Data
-public class ChatDto {
-    private Long chatId;
+public class ChatDTO {
+    private Long telegramChatId;
     private String chatName;
 
-    public ChatDto(Chat chat) {
-        this.chatId = chat.getChatId();
+    public ChatDTO(Chat chat) {
+        this.telegramChatId = chat.getChatId();
         this.chatName = chat.getName();
     }
 }
