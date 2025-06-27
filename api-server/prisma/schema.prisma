@@ -7,18 +7,81 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id      Int      @id @default(autoincrement())
-  email   String   @unique
-  name    String?
-  posts   Post[]
+model chats {
+  id                  Int                   @id @default(autoincrement())
+  name                String?               @db.VarChar(50)
+  members_amount      Int
+  bots_amount         Int
+  chat_settings       chat_settings[]
+  sheduled_tasks_chat sheduled_tasks_chat[]
+  strikes             strikes[]
+  chat_members        chat_members[]
 }
 
-model Post {
-  id        Int     @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean @default(false)
-  author    User?   @relation(fields: [authorId], references: [id])
-  authorId  Int?
+model roles {
+  id                            Int      @id @default(autoincrement())
+  name                          String?  @db.VarChar(50)
+  is_admin                      Boolean?
+  can_add_tasks                 Boolean?
+  can_make_polls                Boolean?
+  can_give_strikes_without_poll Boolean?
+}
+
+model sheduled_tasks_chat {
+  id               Int      @id @default(autoincrement())
+  chat_id          Int
+  task_name        String   @db.VarChar(50)
+  task_description String
+  date_of_expire   DateTime
+
+  chats chats @relation(fields: [chat_id], references: [id])
+}
+
+model users {
+  id        Int       @id @default(autoincrement())
+  login     String?   @db.VarChar(50)
+  password  String?   @db.VarChar(50)
+  firstname String?   @db.VarChar(50)
+  lastname  String?   @db.VarChar(50)
+  members   members[]
+}
+
+model chat_settings {
+  id                       Int  @id @default(autoincrement())
+  chat_id                  Int?
+  tasks_reminder_friquency Int?
+
+  chats chats? @relation(fields: [chat_id], references: [id])
+}
+
+model members {
+  member_id Int     @id @default(autoincrement())
+  user_id   Int?
+  role_id   String? @db.Char(10)
+
+  users        users?         @relation(fields: [user_id], references: [id])
+  // TODO:  Return roles
+  // roles        dbroles?         @relation(fields: [role_id], references: [id])
+  strikes      strikes[]
+  chat_members chat_members[]
+}
+
+model strikes {
+  member_id Int
+  chat_id   Int
+
+  members members @relation(fields: [member_id], references: [member_id])
+  chats   chats   @relation(fields: [chat_id], references: [id])
+
+  @@id([member_id, chat_id])
+}
+
+model chat_members {
+  chat_id   Int
+  member_id Int
+
+  chats   chats   @relation(fields: [chat_id], references: [id])
+  members members @relation(fields: [member_id], references: [member_id])
+
+  @@id([chat_id, member_id])
 }
